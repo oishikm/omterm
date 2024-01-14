@@ -14,6 +14,9 @@
 #include<string.h>
 #include<unistd.h>
 
+#define BIG_LINE 256
+#define SMALL_LINE 64
+
 void getcwd_dirname(char* cwd, char* dirname)
 {
     int i;
@@ -30,19 +33,34 @@ void getcwd_dirname(char* cwd, char* dirname)
     strncpy(dirname, cwd + slash_location + 1, len - slash_location);
 }
 
-void promptline()
+void promptline(char* scanline)
 {
-    char cwd[256], dirname[64], username[64];
-    getcwd(cwd, sizeof(cwd));
+    char cwd[BIG_LINE], dirname[SMALL_LINE], username[SMALL_LINE];
+    
+    getcwd(cwd, sizeof(cwd)); // from unistd.h
     getcwd_dirname(cwd, dirname);
-    getlogin_r(username, sizeof(username));
-    // You can edit next line to customize the prompt line.
-    printf("[%s %s]", username, dirname);
+    getlogin_r(username, sizeof(username)); // from unistd.h
+    
+    // You can edit next line to customize the prompt line, or comment it to get no prompt text (like WozMon)
+    printf("[%s %s]$ ", username, dirname);
+
+    scanf(" %[^\n]s", scanline);
 }
 
 int main()
 {
-    promptline();
-    printf("\n");
-    return 0;
+    char scanline[BIG_LINE];
+
+    while(1) // Main Loop
+    {            
+        promptline(scanline);
+        if(strcmp(scanline, "exit") == 0)
+            goto _exit;
+        else
+            system(scanline);        
+    }
+
+    _exit:
+        printf("[EXIT]\n");
+        return 0;
 }
